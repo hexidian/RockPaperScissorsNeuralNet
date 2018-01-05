@@ -1,6 +1,42 @@
 #include <stdio.h>
 #include <string.h>
 
+void copyChangeCode(int newArray[9], int oldArray[9]){
+  for (int i = 0; i < 9; i++){
+    newArray[i] = oldArray[i];
+  }
+}
+
+void copyValues(int newArray[3][3][3], int oldArray[3][3][3]){
+  for (int i = 0; i < 3; i++){
+    for (int j = 0; j < 3; i++){
+      for (int k = 0; k < 3; k++){
+        newArray[i][j][k] = oldArray[i][j][k];
+      }
+    }
+  }
+}
+
+void applyChange(int values[3][3][3], int changeCode[9]){
+
+  for (int a = 0; a < 9; a++){
+    changeCode[a] --;
+  }
+
+  for (int i = 0; i < 3; i++){
+    for (int k = 0; k < 3; k++){
+      values[i][k][ (0+k) % 3 ] += changeCode[ (3*i) + 0];
+      values[i][k][ (1+k) % 3 ] += changeCode[ (3*i) + 1];
+      values[i][k][ (2+k) % 3 ] += changeCode[ (3*i) + 2];
+    }
+  }
+
+  for (int a = 0; a < 9; a++){//we need this so that we don't mess up changeCode in the upper stack frame
+    changeCode[a] ++;
+  }
+
+}
+
 void outputMove(int index){
   const char *moves[] = {"rock","paper","scissors"};
   printf("%s\n", moves[index]);
@@ -55,54 +91,23 @@ void hillClimb(int values[3][3][3],int pastData[20]){
   int valueChangeCode[9] = {0,0,0,0,0,0,0,0,0};
   int valuesCopy[3][3][3];
   //copyValues(valuesCopy,values);
-
+  int i = 0;
   while (incrementBaseThree(valueChangeCode,9)){
+    if (i%20==0){
+      printf("We are at %d\n", i);
+    }
     copyValues(valuesCopy,values);
+    printf("here\n");
     applyChange(valuesCopy,valueChangeCode);
     int evaluation = evaluateValues(valuesCopy,pastData);
     if (evaluation > bestVal) {
       bestVal = evaluation;
       copyChangeCode(bestCode,valueChangeCode);
     }
+    i++;
   }
   applyChange(values,bestCode);
 
-}
-
-void applyChange(int values[3][3][3], int changeCode[9]){
-
-  for (int a = 0; a < 9; a++){
-    changeCode[a] --;
-  }
-
-  for (int i = 0; i < 3; i++){
-    for (int k = 0; k < 3; k++){
-      values[i][k][ (0+k) % 3 ] += changeCode[ (3*i) + 0];
-      values[i][k][ (1+k) % 3 ] += changeCode[ (3*i) + 1];
-      values[i][k][ (2+k) % 3 ] += changeCode[ (3*i) + 2];
-    }
-  }
-
-  for (int a = 0; a < 9; a++){//we need this so that we don't mess up changeCode in the upper stack frame
-    changeCode[a] ++;
-  }
-
-}
-
-void copyChangeCode(int newArray[9], int oldArray[9]){
-  for (int i = 0; i < 9; i++){
-    newArray[i] = oldArray[i];
-  }
-}
-
-void copyValues(int newArray[3][3][3], int oldArray[3][3][3]){
-  for (int i = 0; i < 3; i++){
-    for (int j = 0; j < 3; i++){
-      for (int k; k < 3; k++){
-        newArray[i][j][k] = oldArray[i][j][k];
-      }
-    }
-  }
 }
 
 int evaluateValues(int values[3][3][3], int data[20]){
