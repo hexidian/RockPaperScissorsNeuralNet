@@ -19,7 +19,7 @@ int makeMove(int values[3][3][3], int pastMoves[3]){
 }
 
 int maxIndex(int array[]){
-  int length = sizeof(array)/sizeof(array[0]);
+  int length = (sizeof(array)/sizeof(array[0]))+1;
   int best[2] = {0,array[0]};
   for (int i = 1; i < length; i++){
     if (array[i] > best[1]) {
@@ -32,7 +32,7 @@ int maxIndex(int array[]){
 }
 
 void updateArray(int array[], int newElement) {
-  int length = sizeof(array)/sizeof(array[0]);
+  int length = (sizeof(array)/sizeof(array[0]))+1;
   for (int i = 0; i < length - 1; i ++) {
     array[i] = array[i+1];
   }
@@ -40,21 +40,24 @@ void updateArray(int array[], int newElement) {
 }
 
 void print(int array[]){
-  int length = sizeof(array)/sizeof(array[0]);
-  printf("length is: %d",length);
+  int length = (sizeof(array)/sizeof(array[0]))+1;
   for (int i = 0; i < length; i ++) {
     printf("%d\n", array[i]);
   }
   printf("\n");
 }
 
+void hillClimb(int values[3][3][3],int pastData[20]){
+
+  int best[2] = [evaluateValues(values,pastData),0];
+
+}
+
 int main(){
   int goForAnother = 1;
 
-  /*  the elements in evaluateRecentMoves correspond to:
-   *  move
-   *  pieceMoved
-   *  value to change for piece
+  /*  evaluateRecentMoves is:
+   *  [move][pieceMoved][valueForPiece] to change for piece
    */
   int evaluateRecentMoves[3][3][3] = {
     {
@@ -74,6 +77,7 @@ int main(){
     }
   };
   int pastMoves[3] = {0,1,2};
+  int extendedPastMoves[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2};
   char userMove[1];
   int userMoveInt;
   while (goForAnother) {
@@ -86,18 +90,17 @@ int main(){
     //now we need to convert the input to an integer
     if (strcmp(userMove,"r")==0) {
       userMoveInt = 0;
-      printf("it's a rock\n");
     } else if (strcmp(userMove,"p")==0) {
-      printf("it's a paper\n");
       userMoveInt = 1;
     } else if (strcmp(userMove,"s")==0) {
       userMoveInt = 2;
-      printf("it's a scissors\n");
     } else {return 1;}//this closes the program because it has gotten an invalid input error
 
     updateArray(pastMoves,userMoveInt);
-    printf("pastMoves is:\n");
-    print(pastMoves);
+    updateArray(extendedPastMoves,userMoveInt);
+
+    hillClimb(evaluateRecentMoves,extendedPastMoves);
+
   }
   return 0;
 }
