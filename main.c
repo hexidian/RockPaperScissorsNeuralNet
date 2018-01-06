@@ -1,15 +1,34 @@
 #include <stdio.h>
 #include <string.h>
 
+int compare1dArrays(int arrayA[], int arrayB[], int length){
+  for (int i = 0; i < length; i++){
+    if (arrayA[i] != arrayB[i]){ return 0; }
+  }
+  return 1;
+}
+
 void copyChangeCode(int newArray[9], int oldArray[9]){
   for (int i = 0; i < 9; i++){
     newArray[i] = oldArray[i];
   }
 }
 
+void printValues(int values[3][3][3]){
+  for (int i = 0; i < 3; i++){
+    for (int j = 0; j < 3; j++){
+      for (int k = 0; k < 3; k++){
+        printf("%d\n", values[i][j][k]);
+      }
+      printf(">\n");
+    }
+    printf(">>\n");
+  }
+}
+
 void copyValues(int newArray[3][3][3], int oldArray[3][3][3]){
   for (int i = 0; i < 3; i++){
-    for (int j = 0; j < 3; i++){
+    for (int j = 0; j < 3; j++){
       for (int k = 0; k < 3; k++){
         newArray[i][j][k] = oldArray[i][j][k];
       }
@@ -67,16 +86,14 @@ int maxIndex(int array[]){
   return best[0];
 }
 
-void updateArray(int array[], int newElement) {
-  int length = (sizeof(array)/sizeof(array[0]))+1;
+void updateArray(int array[], int newElement, int length) {
   for (int i = 0; i < length - 1; i ++) {
     array[i] = array[i+1];
   }
   array[length-1] = newElement;
 }
 
-void print(int array[]){
-  int length = (sizeof(array)/sizeof(array[0]))+1;
+void print(int array[], int length){
   for (int i = 0; i < length; i ++) {
     printf("%d\n", array[i]);
   }
@@ -93,11 +110,7 @@ void hillClimb(int values[3][3][3],int pastData[20]){
   //copyValues(valuesCopy,values);
   int i = 0;
   while (incrementBaseThree(valueChangeCode,9)){
-    if (i%20==0){
-      printf("We are at %d\n", i);
-    }
     copyValues(valuesCopy,values);
-    printf("here\n");
     applyChange(valuesCopy,valueChangeCode);
     int evaluation = evaluateValues(valuesCopy,pastData);
     if (evaluation > bestVal) {
@@ -107,11 +120,24 @@ void hillClimb(int values[3][3][3],int pastData[20]){
     i++;
   }
   applyChange(values,bestCode);
-
+  //printf("the best values I found had a score of: %d\n", bestVal);
 }
 
 int evaluateValues(int values[3][3][3], int data[20]){
-  return 1;
+
+  int score = 0;
+  int wouldBeMove;
+  for (int i = 0; i < 17; i++){
+    int tempMoves[3] = {data[i], data[i+1], data[i+2]};
+    wouldBeMove = makeMove(values, tempMoves);
+    if ( wouldBeMove == (data[i+3] + 1) % 3 ){//if the computer move would have beaten the user move
+      score++;
+    } else {//this method does not like ties. Maybe not the best. TODO test having ties be worth nothing
+      score --;
+    }
+  }
+  return score;
+
 }
 
 int incrementBaseThree(int number[], int length){//the return value is 1 if successfull, and 0 if not. this happens when you try and increment an all two's array
@@ -128,11 +154,10 @@ int incrementBaseThree(int number[], int length){//the return value is 1 if succ
     }
     i++;
     if (i == length) {
-      return 0;
+      if (carry) return 0;
     }
   }
   return 1;
-
 }
 
 int main(){
@@ -143,25 +168,28 @@ int main(){
    */
   int evaluateRecentMoves[3][3][3] = {
     {
-      {5,0,0},
-      {0,5,0},
-      {0,0,5}
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
     },
     {
-      {10,0,0},
-      {0,10,0},
-      {0,0,10}
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
     },
     {
-      {20,0,0},
-      {0,20,0},
-      {0,0,20}
+      {0,0,0},
+      {0,0,0},
+      {0,0,0}
     }
   };
   int pastMoves[3] = {0,1,2};
   int extendedPastMoves[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2};
   char userMove[1];
   int userMoveInt;
+
+  int userMovesTaken = 0;
+
   while (goForAnother) {
     int move = makeMove(evaluateRecentMoves,pastMoves);
     outputMove(move);
@@ -178,11 +206,14 @@ int main(){
       userMoveInt = 2;
     } else {return 1;}//this closes the program because it has gotten an invalid input error
 
-    updateArray(pastMoves,userMoveInt);
-    updateArray(extendedPastMoves,userMoveInt);
+    updateArray(pastMoves,userMoveInt,3);
+    updateArray(extendedPastMoves,userMoveInt,20);
 
-    hillClimb(evaluateRecentMoves,extendedPastMoves);
+    if (userMovesTaken > 20){
+      hillClimb(evaluateRecentMoves,extendedPastMoves);
+    }
 
+    userMovesTaken++;
   }
   return 0;
 }
