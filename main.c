@@ -186,7 +186,7 @@ int main(){
     }
   };
   int pastMoves[3] = {0,1,2};
-  int extendedPastMoves[pastLooking] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2};
+  int extendedPastMoves[pastLooking];
   char userMove[1];
   int userMoveInt;
 
