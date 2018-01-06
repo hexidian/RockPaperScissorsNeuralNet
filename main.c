@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define pastLooking 10
+
 int compare1dArrays(int arrayA[], int arrayB[], int length){
   for (int i = 0; i < length; i++){
     if (arrayA[i] != arrayB[i]){ return 0; }
@@ -100,7 +102,7 @@ void print(int array[], int length){
   printf("\n");
 }
 
-void hillClimb(int values[3][3][3],int pastData[20]){
+void hillClimb(int values[3][3][3],int pastData[pastLooking]){
 
   int bestVal = evaluateValues(values,pastData);
   int bestCode[9] = {0,0,0,0,0,0,0,0,0};
@@ -123,7 +125,7 @@ void hillClimb(int values[3][3][3],int pastData[20]){
   //printf("the best values I found had a score of: %d\n", bestVal);
 }
 
-int evaluateValues(int values[3][3][3], int data[20]){
+int evaluateValues(int values[3][3][3], int data[pastLooking]){
 
   int score = 0;
   int wouldBeMove;
@@ -184,7 +186,7 @@ int main(){
     }
   };
   int pastMoves[3] = {0,1,2};
-  int extendedPastMoves[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2};
+  int extendedPastMoves[pastLooking] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2};
   char userMove[1];
   int userMoveInt;
 
@@ -207,9 +209,9 @@ int main(){
     } else {return 1;}//this closes the program because it has gotten an invalid input error
 
     updateArray(pastMoves,userMoveInt,3);
-    updateArray(extendedPastMoves,userMoveInt,20);
+    updateArray(extendedPastMoves,userMoveInt,pastLooking);
 
-    if (userMovesTaken > 20){
+    if (userMovesTaken > pastLooking){
       hillClimb(evaluateRecentMoves,extendedPastMoves);
     }
 
