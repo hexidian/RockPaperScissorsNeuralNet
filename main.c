@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define pastLooking 10
+#define PASTLOOKING 10
 
 int compare1dArrays(int arrayA[], int arrayB[], int length){
   for (int i = 0; i < length; i++){
@@ -64,19 +64,7 @@ void outputMove(int index){
 
 }
 
-int makeMove(int values[3][3][3], int pastMoves[3]){
-  int decidingValues[3] = {0,0,0};
-  for (int i = 0; i < 3; i++){
-    int pieceMoved = pastMoves[i];
-    for (int j = 0; j < 3; j++){
-      decidingValues[j] += values[i][pieceMoved][j];
-    }
-  }
-  return maxIndex(decidingValues);
-}
-
-int maxIndex(int array[]){
-  int length = (sizeof(array)/sizeof(array[0]))+1;
+int maxIndex(int array[],int length){
   int best[2] = {0,array[0]};
   for (int i = 1; i < length; i++){
     if (array[i] > best[1]) {
@@ -86,6 +74,17 @@ int maxIndex(int array[]){
   }
   //printf("the top value was %d\n", best[1]);
   return best[0];
+}
+
+int makeMove(int values[3][3][3], int pastMoves[3]){
+  int decidingValues[3] = {0,0,0};
+  for (int i = 0; i < 3; i++){
+    int pieceMoved = pastMoves[i];
+    for (int j = 0; j < 3; j++){
+      decidingValues[j] += values[i][pieceMoved][j];
+    }
+  }
+  return maxIndex(decidingValues,3);
 }
 
 void updateArray(int array[], int newElement, int length) {
@@ -102,34 +101,11 @@ void print(int array[], int length){
   printf("\n");
 }
 
-void hillClimb(int values[3][3][3],int pastData[pastLooking]){
-
-  int bestVal = evaluateValues(values,pastData);
-  int bestCode[9] = {0,0,0,0,0,0,0,0,0};
-
-  int valueChangeCode[9] = {0,0,0,0,0,0,0,0,0};
-  int valuesCopy[3][3][3];
-  //copyValues(valuesCopy,values);
-  int i = 0;
-  while (incrementBaseThree(valueChangeCode,9)){
-    copyValues(valuesCopy,values);
-    applyChange(valuesCopy,valueChangeCode);
-    int evaluation = evaluateValues(valuesCopy,pastData);
-    if (evaluation > bestVal) {
-      bestVal = evaluation;
-      copyChangeCode(bestCode,valueChangeCode);
-    }
-    i++;
-  }
-  applyChange(values,bestCode);
-  //printf("the best values I found had a score of: %d\n", bestVal);
-}
-
-int evaluateValues(int values[3][3][3], int data[pastLooking]){
+int evaluateValues(int values[3][3][3], int data[PASTLOOKING]){
 
   int score = 0;
   int wouldBeMove;
-  for (int i = 0; i < 17; i++){
+  for (int i = 0; i < (PASTLOOKING-3); i++){
     int tempMoves[3] = {data[i], data[i+1], data[i+2]};
     wouldBeMove = makeMove(values, tempMoves);
     if ( wouldBeMove == (data[i+3] + 1) % 3 ){//if the computer move would have beaten the user move
@@ -162,6 +138,28 @@ int incrementBaseThree(int number[], int length){//the return value is 1 if succ
   return 1;
 }
 
+void hillClimb(int values[3][3][3],int pastData[PASTLOOKING]){
+  int bestVal = evaluateValues(values,pastData);
+  int bestCode[9] = {0,0,0,0,0,0,0,0,0};
+
+  int valueChangeCode[9] = {0,0,0,0,0,0,0,0,0};
+  int valuesCopy[3][3][3];
+  //copyValues(valuesCopy,values);
+  int i = 0;
+  while (incrementBaseThree(valueChangeCode,9)){
+    copyValues(valuesCopy,values);
+    applyChange(valuesCopy,valueChangeCode);
+    int evaluation = evaluateValues(valuesCopy,pastData);
+    if (evaluation > bestVal) {
+      bestVal = evaluation;
+      copyChangeCode(bestCode,valueChangeCode);
+    }
+    i++;
+  }
+  applyChange(values,bestCode);
+  //printf("the best values I found had a score of: %d\n", bestVal);
+}
+
 int main(){
   int goForAnother = 1;
 
@@ -186,13 +184,13 @@ int main(){
     }
   };
   int pastMoves[3] = {0,1,2};
-  int extendedPastMoves[pastLooking];
+  int extendedPastMoves[PASTLOOKING];
   char userMove[1];
   int userMoveInt;
 
   int userMovesTaken = 0;
 
-  while (goForAnother) {
+  while (1) {
     int move = makeMove(evaluateRecentMoves,pastMoves);
     outputMove(move);
     printf("what was your move? (r/p/s)\n");
@@ -209,13 +207,13 @@ int main(){
     } else {return 1;}//this closes the program because it has gotten an invalid input error
 
     updateArray(pastMoves,userMoveInt,3);
-    updateArray(extendedPastMoves,userMoveInt,pastLooking);
-
-    if (userMovesTaken > pastLooking){
+    updateArray(extendedPastMoves,userMoveInt,PASTLOOKING);
+    if (userMovesTaken > PASTLOOKING){
       hillClimb(evaluateRecentMoves,extendedPastMoves);
     }
 
     userMovesTaken++;
   }
+  printf("here\n");
   return 0;
 }
